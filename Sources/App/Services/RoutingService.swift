@@ -7,10 +7,11 @@ struct RoutingService {
 	let db: Database
 
 	func getClosestCoordinates(to referenceCoordinates: Coordinates) async throws -> CoordinateResult? {
+		let pointStr = "POINT(\(referenceCoordinates.1) \(referenceCoordinates.0))"
 		if let sql = self.db as? SQLDatabase {
 			return try await sql.raw("""
-			SELECT gid, lat, lon FROM ways_vertices_pgr
-			ORDER BY the_geom <-> ST_GeometryFromText('POINT(\(bind: referenceCoordinates.1) \(bind: referenceCoordinates.0))',4326)'
+			SELECT id, lat, lon FROM ways_vertices_pgr
+			ORDER BY the_geom <-> ST_GeometryFromText(\(bind: pointStr),4326)
 			LIMIT 1
 			""").first(decoding: CoordinateResult.self)
 		} else {

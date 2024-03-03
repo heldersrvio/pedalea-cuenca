@@ -7,7 +7,7 @@ final class AppTests: XCTestCase {
 	func testGetClosestCoordinates() async throws {
 		let db = ArrayTestDatabase()
 		db.append([
-			TestOutput(["gid": 2, "lat": -2.89726320, "lon": -79.00694560])
+			TestOutput(["id": 2, "lat": -2.89726320, "lon": -79.00694560])
 		])
 		let routingService = RoutingService(db: db.db)
 		let startingPoint = (-2.897406, -79.006874)
