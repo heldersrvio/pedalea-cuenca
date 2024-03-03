@@ -4,7 +4,7 @@ final class CoordinateResult: Model {
 	
 	static let schema = "ways_vertices_pgr"
 
-	@ID(custom: "gid")
+	@ID(custom: "id")
 	var id: Int?
 
 	@Field(key: "lat")

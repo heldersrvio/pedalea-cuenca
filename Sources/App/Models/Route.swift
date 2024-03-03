@@ -1,6 +1,7 @@
+import Vapor
 import Fluent
 
-final class Route: Model {
+final class Route: Model, Content {
 	
 	static let schema = "ways"
 
