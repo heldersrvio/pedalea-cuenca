@@ -2,8 +2,8 @@ import Vapor
 
 struct UsersController: RouteCollection {
 	func boot(routes: RoutesBuilder) throws {
-		let users = routes.grouped("users")
-		users.group(":id") { user in
+		let secure = routes.grouped(SessionToken.authenticator(), SessionToken.guardMiddleware()).grouped("users")
+		secure.group(":id") { user in
 			user.get(use: show)
 			user.put(use: update)
 		}

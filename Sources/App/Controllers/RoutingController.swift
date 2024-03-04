@@ -5,7 +5,7 @@ struct RoutingController: RouteCollection {
 	let routingService: RoutingService
 
 	func boot(routes: RoutesBuilder) throws {
-		let routing = routes.grouped("routing")
+		let routing = routes.grouped(SessionToken.authenticator(), SessionToken.guardMiddleware()).grouped("routing")
 		routing.post(use: calculateRoute)
 	}
 

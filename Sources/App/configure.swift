@@ -1,3 +1,4 @@
+import JWT
 import NIOSSL
 import Fluent
 import FluentPostgresDriver
@@ -18,4 +19,6 @@ public func configure(_ app: Application) async throws {
     try routes(app)
 
 	app.migrations.add(UsersMigration())
+
+	app.jwt.signers.use(.hs256(key: Environment.get("JWT_KEY") ?? "secret"))
 }
