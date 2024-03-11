@@ -14,10 +14,17 @@ final class User: Model, Content {
 	@Field(key: "email")
 	var email: String?
 
-	init(id: UUID? = nil, name: String, email: String) {
+	@Field(key: "stripe_id")
+	var stripeId: String?
+
+	@Field(key: "subscription_active")
+	var isSubscriptionActive: Bool?
+
+	init(id: UUID? = nil, name: String, email: String, stripeId: String? = nil, isSubscriptionActive: Bool? = false) {
 		self.id = id
 		self.name = name
 		self.email = email
+		self.isSubscriptionActive = isSubscriptionActive
 	}
 
 	init() { }

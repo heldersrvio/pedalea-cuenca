@@ -19,6 +19,7 @@ public func configure(_ app: Application) async throws {
     try routes(app)
 
 	app.migrations.add(UsersMigration())
+	app.migrations.add(UsersStripeMigration())
 
 	app.jwt.signers.use(.hs256(key: Environment.get("JWT_KEY") ?? "secret"))
 }
