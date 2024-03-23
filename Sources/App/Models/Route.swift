@@ -28,6 +28,18 @@ final class Route: Model, Content {
 
 	@Field(key: "agg_cost")
 	var aggCost: Double
+	
+	@Field(key: "lat1")
+	var lat1: Double?
+
+	@Field(key: "lon1")
+	var lon1: Double?
+
+	@Field(key: "lat2")
+	var lat2: Double?
+
+	@Field(key: "lon2")
+	var lon2: Double?
 
 	init() {}
 
