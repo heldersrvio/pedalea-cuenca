@@ -28,7 +28,7 @@ struct RoutingService {
 				WHEN tag_id = 501 THEN TRUE
 				ELSE FALSE
 			END AS is_cycle_lane
-			FROM pgr_Dijkstra('select gid as id, source, target, cost, reverse_cost from ways', \(bind: startingPoint), \(bind: destinationPoint), false) AS dijkstra
+			FROM pgr_Dijkstra('select gid as id, source, target, cost, reverse_cost from ways', \(bind: startingPoint), \(bind: destinationPoint), true) AS dijkstra
 			LEFT JOIN ways ON (edge = gid)
 			""").all(decoding: Route.self)
 		} else {
