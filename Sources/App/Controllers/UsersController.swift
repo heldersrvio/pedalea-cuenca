@@ -20,7 +20,7 @@ struct UsersController: RouteCollection {
 			throw Abort(.unauthorized, reason: "Email not present in token")
 		}
 		if let user = try await User.query(on: req.db).filter(\.$email == email).first(), let userId = user.id, let userName = user.name {
-			let jwtPayload = try SessionToken(userId: userId)
+			let jwtPayload = SessionToken(userId: userId)
 			return ClientTokenResponse(userName: userName, token: try req.jwt.sign(jwtPayload))
 		}
 		guard let name = token.name else {
@@ -31,11 +31,15 @@ struct UsersController: RouteCollection {
 		guard let newUserId = newUser.id else {
 			throw Abort(.unauthorized, reason: "Could not save user")
 		}
-		let jwtPayload = try SessionToken(userId: newUserId)
+		let jwtPayload = SessionToken(userId: newUserId)
 		return ClientTokenResponse(userName: name, token: try req.jwt.sign(jwtPayload))
 	}
 
 	func show(req: Request) async throws -> User {
+		let sessionToken = try req.auth.require(SessionToken.self)
+		guard sessionToken.userId == req.parameters.get("id") else {
+			throw Abort(.unauthorized)
+		}
 		guard let user = try await User.find(req.parameters.get("id"), on: req.db) else {
 			throw Abort(.notFound)
 		}
@@ -43,6 +47,10 @@ struct UsersController: RouteCollection {
 	}
 
 	func update(req: Request) async throws -> User {
+		let sessionToken = try req.auth.require(SessionToken.self)
+		guard sessionToken.userId == req.parameters.get("id") else {
+			throw Abort(.unauthorized)
+		}
 		guard let user = try await User.find(req.parameters.get("id"), on: req.db) else {
 			throw Abort(.notFound)
 		}
