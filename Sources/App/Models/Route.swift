@@ -41,6 +41,9 @@ final class Route: Model, Content {
 	@Field(key: "lon2")
 	var lon2: Double?
 
+	@Field(key: "is_cycle_lane")
+	var isCycleLane: Bool
+
 	init() {}
 
 }
