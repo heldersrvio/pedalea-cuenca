@@ -2,3 +2,4 @@
 *.osm
 mapconfig.xml
 .env*
+.vscode
