@@ -7,6 +7,9 @@ struct PaymentsController: RouteCollection {
 		payments.group("apple") { payment in
 			payment.post(use: handleAppleNotification)
 		}
+		payments.group("google") { payment in
+			payment.post(use: handleGoogleNotification)
+		}
 	}
 
 	func handleAppleNotification(req: Request) async throws -> HTTPStatus {
@@ -41,4 +44,34 @@ struct PaymentsController: RouteCollection {
 		}
 		return .ok
 	}
+
+	func handleGoogleNotification(req: Request) async throws -> HTTPStatus {
+		let googlePaymentService = GooglePaymentService()
+		let requestMessage = try req.content.decode(GooglePubSubMessage.self)
+		guard let data = requestMessage.data else {
+			return .ok
+		}
+		let payload = try googlePaymentService.decodePayload(data)
+		guard let subscriptionNotification = payload.subscriptionNotification else {
+			return .ok
+		}
+		guard let user = try await User.query(on: req.db)
+			.filter(\.$googlePurchaseToken == subscriptionNotification.purchaseToken)
+			.first(), let userId = user.id else {
+				throw Abort(.notFound)
+		}
+		print("Received Google's notification \(subscriptionNotification.notificationType) for user \(userId)")
+		switch subscriptionNotification.notificationType {
+		case 4, 7, 2:
+			user.isSubscriptionActive = true
+			try await user.save(on: req.db)
+		case 3, 12, 13:
+			user.isSubscriptionActive = false
+			try await user.save(on: req.db)
+		default:
+			print("Notification type not handled")
+		}
+		return .ok
+	}
+
 }

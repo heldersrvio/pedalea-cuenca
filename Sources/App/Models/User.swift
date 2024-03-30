@@ -14,8 +14,8 @@ final class User: Model, Content {
 	@Field(key: "email")
 	var email: String?
 
-	@Field(key: "stripe_id")
-	var stripeId: String?
+	@Field(key: "google_purchase_token")
+	var googlePurchaseToken: String?
 
 	@Field(key: "apple_app_account_token")
 	var appleAppAccountToken: String?
@@ -23,7 +23,7 @@ final class User: Model, Content {
 	@Field(key: "subscription_active")
 	var isSubscriptionActive: Bool?
 
-	init(id: UUID? = nil, name: String, email: String, stripeId: String? = nil, appleAppAccountToken: String? = nil, isSubscriptionActive: Bool? = false) {
+	init(id: UUID? = nil, name: String, email: String, googlePurchaseToken: String? = nil, appleAppAccountToken: String? = nil, isSubscriptionActive: Bool? = false) {
 		self.id = id
 		self.name = name
 		self.email = email
