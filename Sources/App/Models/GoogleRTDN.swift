@@ -14,7 +14,7 @@ struct TestNotification: Content {
 struct GoogleRTDN: Content {
 	var version: String
 	var packageName: String
-	var eventTimeMillis: Double
+	var eventTimeMillis: String
 	var subscriptionNotification: SubscriptionNotification?
 	var testNotification: TestNotification?
 }

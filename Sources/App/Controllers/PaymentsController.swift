@@ -47,17 +47,21 @@ struct PaymentsController: RouteCollection {
 
 	func handleGoogleNotification(req: Request) async throws -> HTTPStatus {
 		let googlePaymentService = GooglePaymentService()
-		let requestMessage = try req.content.decode(GooglePubSubMessage.self)
+		let requestNotification = try req.content.decode(GooglePubSubNotification.self)
+		let requestMessage = requestNotification.message
 		guard let data = requestMessage.data else {
+			print("No data found")
 			return .ok
 		}
 		let payload = try googlePaymentService.decodePayload(data)
 		guard let subscriptionNotification = payload.subscriptionNotification else {
+			print("No subscription notification found")
 			return .ok
 		}
 		guard let user = try await User.query(on: req.db)
 			.filter(\.$googlePurchaseToken == subscriptionNotification.purchaseToken)
 			.first(), let userId = user.id else {
+				print("User not found")
 				throw Abort(.notFound)
 		}
 		print("Received Google's notification \(subscriptionNotification.notificationType) for user \(userId)")
