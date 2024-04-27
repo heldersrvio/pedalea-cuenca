@@ -55,8 +55,12 @@ struct UsersController: RouteCollection {
 			throw Abort(.notFound)
 		}
 		let updatedUser = try req.content.decode(User.self)
-		user.name = updatedUser.name
-		user.googlePurchaseToken = updatedUser.googlePurchaseToken
+		if let updatedUserName = updatedUser.name {
+			user.name = updatedUserName
+		}
+		if let updatedUserGooglePurchaseToken = updatedUser.googlePurchaseToken {
+			user.googlePurchaseToken = updatedUserGooglePurchaseToken
+		}
 		try await user.save(on: req.db)
 		return user
 	}
