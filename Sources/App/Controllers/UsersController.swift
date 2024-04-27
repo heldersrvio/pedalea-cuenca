@@ -21,7 +21,7 @@ struct UsersController: RouteCollection {
 		}
 		if let user = try await User.query(on: req.db).filter(\.$email == email).first(), let userId = user.id, let userName = user.name {
 			let jwtPayload = SessionToken(userId: userId)
-			return ClientTokenResponse(userName: userName, token: try req.jwt.sign(jwtPayload))
+			return ClientTokenResponse(userId: userId.uuidString, userName: userName, token: try req.jwt.sign(jwtPayload))
 		}
 		guard let name = token.name else {
 			throw Abort(.unauthorized, reason: "Name not present in token")
@@ -32,7 +32,7 @@ struct UsersController: RouteCollection {
 			throw Abort(.unauthorized, reason: "Could not save user")
 		}
 		let jwtPayload = SessionToken(userId: newUserId)
-		return ClientTokenResponse(userName: name, token: try req.jwt.sign(jwtPayload))
+		return ClientTokenResponse(userId: newUserId.uuidString, userName: name, token: try req.jwt.sign(jwtPayload))
 	}
 
 	func show(req: Request) async throws -> User {

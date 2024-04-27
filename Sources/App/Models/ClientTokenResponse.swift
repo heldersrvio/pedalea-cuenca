@@ -1,10 +1,12 @@
 import Vapor
 
 final class ClientTokenResponse: Content {
+	var userId: String
 	var userName: String
 	var token: String
 
-	init(userName: String, token: String) {
+	init(userId: String, userName: String, token: String) {
+		self.userId = userId
 		self.userName = userName
 		self.token = token
 	}
