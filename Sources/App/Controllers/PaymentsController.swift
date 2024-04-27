@@ -74,10 +74,13 @@ struct PaymentsController: RouteCollection {
 		}
 		print("Received Google's notification \(subscriptionNotification.notificationType) for user \(userId)")
 		switch subscriptionNotification.notificationType {
-		case 4, 7, 2:
+		case 1, 2, 4, 7:
 			user.isSubscriptionActive = true
 			try await user.save(on: req.db)
 		case 3, 12, 13:
+			user.googlePurchaseToken = nil
+			fallthrough
+		case 3, 5, 10, 12, 13:
 			user.isSubscriptionActive = false
 			try await user.save(on: req.db)
 		default:
