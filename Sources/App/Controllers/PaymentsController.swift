@@ -58,9 +58,11 @@ struct PaymentsController: RouteCollection {
 			print("No subscription notification found")
 			return .ok
 		}
+		print("Google purchase token: \(subscriptionNotification.purchaseToken)")
 		guard let user = try await User.query(on: req.db)
 			.filter(\.$googlePurchaseToken == subscriptionNotification.purchaseToken)
 			.first(), let userId = user.id else {
+				print("Received Google's notification \(subscriptionNotification.notificationType)")
 				print("User not found")
 				throw Abort(.notFound)
 		}
