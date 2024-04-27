@@ -64,7 +64,13 @@ struct PaymentsController: RouteCollection {
 			.first(), let userId = user.id else {
 				print("Received Google's notification \(subscriptionNotification.notificationType)")
 				print("User not found")
-				throw Abort(.notFound)
+
+				switch subscriptionNotification.notificationType {
+				case 3, 5, 10, 12, 13:
+					return .ok
+				default:
+					throw Abort(.notFound)
+				}
 		}
 		print("Received Google's notification \(subscriptionNotification.notificationType) for user \(userId)")
 		switch subscriptionNotification.notificationType {
