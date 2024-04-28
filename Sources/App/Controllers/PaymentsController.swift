@@ -46,7 +46,21 @@ struct PaymentsController: RouteCollection {
 	}
 
 	func handleGoogleNotification(req: Request) async throws -> HTTPStatus {
-		let googlePaymentService = GooglePaymentService()
+		if req.query["token"] != Environment.get("GOOGLE_PUB_SUB_TOKEN") {
+			print("Missing or incorrect Google Pub Sub token")
+			throw Abort(.unauthorized)
+		}
+		let googlePaymentService = GooglePaymentService(jwt: req.jwt)
+		guard let authenticationToken = req.headers.bearerAuthorization?.token else {
+			print("Could not find Bearer authorization")
+			throw Abort(.unauthorized)
+		}
+		do {
+			try await googlePaymentService.verify(authenticationToken)
+		} catch {
+			print("Could not verify authentication token")
+			throw Abort(.unauthorized)
+		}
 		let requestNotification = try req.content.decode(GooglePubSubNotification.self)
 		let requestMessage = requestNotification.message
 		guard let data = requestMessage.data else {
