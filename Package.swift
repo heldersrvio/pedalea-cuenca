@@ -15,6 +15,7 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.7.2"),
 		.package(url: "https://github.com/vapor/fluent-kit.git", from: "1.47.1"),
 		.package(url: "https://github.com/vapor/jwt.git", from: "4.2.2"),
+		.package(url: "https://github.com/heldersrvio/google-cloud-kit.git", branch: "main"),
     ],
     targets: [
         .executableTarget(
@@ -24,6 +25,7 @@ let package = Package(
                 .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"),
                 .product(name: "Vapor", package: "vapor"),
 				.product(name: "JWT", package: "jwt"),
+				.product(name: "GoogleCloudKit", package: "google-cloud-kit"),
             ]
         ),
         .testTarget(name: "AppTests", dependencies: [

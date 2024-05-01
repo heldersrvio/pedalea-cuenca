@@ -50,7 +50,7 @@ struct PaymentsController: RouteCollection {
 			print("Missing or incorrect Google Pub Sub token")
 			throw Abort(.unauthorized)
 		}
-		let googlePaymentService = GooglePaymentService(jwt: req.jwt)
+		let googlePaymentService = try GooglePaymentService(jwt: req.jwt, app: req.application, eventLoop: req.eventLoop)
 		guard let authenticationToken = req.headers.bearerAuthorization?.token else {
 			print("Could not find Bearer authorization")
 			throw Abort(.unauthorized)
@@ -61,6 +61,7 @@ struct PaymentsController: RouteCollection {
 			print("Could not verify authentication token")
 			throw Abort(.unauthorized)
 		}
+
 		let requestNotification = try req.content.decode(GooglePubSubNotification.self)
 		let requestMessage = requestNotification.message
 		guard let data = requestMessage.data else {
@@ -73,6 +74,9 @@ struct PaymentsController: RouteCollection {
 			return .ok
 		}
 		print("Google purchase token: \(subscriptionNotification.purchaseToken)")
+
+		let subscriptionStatus = try await googlePaymentService.getSubscriptionStatus(token: subscriptionNotification.purchaseToken)
+		print("Subscription status: \(subscriptionStatus)")
 		guard let user = try await User.query(on: req.db)
 			.filter(\.$googlePurchaseToken == subscriptionNotification.purchaseToken)
 			.first(), let userId = user.id else {
@@ -89,18 +93,25 @@ struct PaymentsController: RouteCollection {
 		print("Received Google's notification \(subscriptionNotification.notificationType) for user \(userId)")
 		switch subscriptionNotification.notificationType {
 		case 1, 2, 4, 7:
-			user.isSubscriptionActive = true
-			try await user.save(on: req.db)
+			if subscriptionStatus == .active {
+				user.isSubscriptionActive = true
+				try await user.save(on: req.db)
+			}
 		case 3, 12, 13:
-			user.googlePurchaseToken = nil
-			fallthrough
+			if subscriptionStatus == .canceled || subscriptionStatus == .expired {
+				user.googlePurchaseToken = nil
+				fallthrough
+			}
 		case 3, 5, 10, 12, 13:
-			user.isSubscriptionActive = false
-			try await user.save(on: req.db)
+			if subscriptionStatus == .canceled || subscriptionStatus == .expired || subscriptionStatus == .onHold || subscriptionStatus == .paused {
+				user.isSubscriptionActive = false
+				try await user.save(on: req.db)
+			}
 		default:
 			print("Notification type not handled")
 		}
 		return .ok
 	}
+
 
 }
