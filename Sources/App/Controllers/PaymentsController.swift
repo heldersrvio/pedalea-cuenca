@@ -97,12 +97,12 @@ struct PaymentsController: RouteCollection {
 				user.isSubscriptionActive = true
 				try await user.save(on: req.db)
 			}
-		case 3, 12, 13:
+		case 12, 13:
 			if subscriptionStatus == .canceled || subscriptionStatus == .expired {
 				user.googlePurchaseToken = nil
 				fallthrough
 			}
-		case 3, 5, 10, 12, 13:
+		case 5, 10, 12, 13:
 			if subscriptionStatus == .canceled || subscriptionStatus == .expired || subscriptionStatus == .onHold || subscriptionStatus == .paused {
 				user.isSubscriptionActive = false
 				try await user.save(on: req.db)
