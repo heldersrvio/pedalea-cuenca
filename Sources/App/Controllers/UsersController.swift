@@ -20,7 +20,7 @@ struct UsersController: RouteCollection {
 			throw Abort(.unauthorized, reason: "Email not present in token")
 		}
 		if let user = try await User.query(on: req.db).filter(\.$email == email).first(), let userId = user.id, let userName = user.name, let isSubscriptionActive = user.isSubscriptionActive {
-			let jwtPayload = SessionToken(userId: userId, isSubscriptionActive: isSubscriptionActive)
+			let jwtPayload = SessionToken(userId: userId, isSubscriptionActive: isSubscriptionActive, googlePurchaseToken: user.googlePurchaseToken)
 			return ClientTokenResponse(userId: userId.uuidString, userName: userName, token: try req.jwt.sign(jwtPayload))
 		}
 		guard let name = token.name else {
@@ -31,7 +31,7 @@ struct UsersController: RouteCollection {
 		guard let newUserId = newUser.id, let newUserSubscriptionStatus = newUser.isSubscriptionActive else {
 			throw Abort(.unauthorized, reason: "Could not save user")
 		}
-		let jwtPayload = SessionToken(userId: newUserId, isSubscriptionActive: newUserSubscriptionStatus)
+		let jwtPayload = SessionToken(userId: newUserId, isSubscriptionActive: newUserSubscriptionStatus, googlePurchaseToken: newUser.googlePurchaseToken)
 		return ClientTokenResponse(userId: newUserId.uuidString, userName: name, token: try req.jwt.sign(jwtPayload))
 	}
 
