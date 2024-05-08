@@ -36,6 +36,9 @@ struct PaymentsController: RouteCollection {
 		case "DID_RENEW", "SUBSCRIBED":
 			user.isSubscriptionActive = true
 			try await user.save(on: req.db)
+		case "REVOKE", "EXPIRED":
+			user.appleAppAccountToken = nil
+			fallthrough
 		case "REVOKE", "GRACE_PERIOD_EXPIRED", "EXPIRED":
 			user.isSubscriptionActive = false
 			try await user.save(on: req.db)

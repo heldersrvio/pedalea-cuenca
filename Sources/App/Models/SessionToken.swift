@@ -13,11 +13,14 @@ struct SessionToken: Content, Authenticatable, JWTPayload {
 
 	var googlePurchaseToken: String?
 
-	init(userId: UUID, isSubscriptionActive: Bool, googlePurchaseToken: String? = nil) {
+	var appleAppAccountToken: String?
+
+	init(userId: UUID, isSubscriptionActive: Bool, googlePurchaseToken: String? = nil, appleAppAccountToken: String? = nil) {
 		self.userId = userId
 		self.expiration = ExpirationClaim(value: Date().addingTimeInterval(expirationTime))
 		self.isSubscriptionActive = isSubscriptionActive
 		self.googlePurchaseToken = googlePurchaseToken
+		self.appleAppAccountToken = appleAppAccountToken
 	}
 
 	init(user: User) throws {
@@ -25,6 +28,7 @@ struct SessionToken: Content, Authenticatable, JWTPayload {
 		self.expiration = ExpirationClaim(value: Date().addingTimeInterval(expirationTime))
 		self.isSubscriptionActive = user.isSubscriptionActive ?? false
 		self.googlePurchaseToken = user.googlePurchaseToken
+		self.appleAppAccountToken = user.appleAppAccountToken
 	}
 
 	func verify(using signer: JWTSigner) throws {
