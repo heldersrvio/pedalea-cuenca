@@ -28,6 +28,8 @@ final class User: Model, Content {
 		self.name = name
 		self.email = email
 		self.isSubscriptionActive = isSubscriptionActive
+		self.googlePurchaseToken = googlePurchaseToken
+		self.appleAppAccountToken = appleAppAccountToken
 	}
 
 	init() { }
