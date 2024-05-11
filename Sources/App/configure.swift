@@ -22,6 +22,7 @@ public func configure(_ app: Application) async throws {
 	app.migrations.add(ApplePaymentMigration())
 	app.migrations.add(GooglePaymentMigration())
 	app.migrations.add(UserIndicesMigration())
+	app.migrations.add(ExtensionsMigration())
 
 	app.jwt.signers.use(.hs256(key: Environment.get("JWT_KEY") ?? "secret"))
 }
