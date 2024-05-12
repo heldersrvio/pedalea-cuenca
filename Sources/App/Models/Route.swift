@@ -11,12 +11,6 @@ final class Route: Model, Content {
 	@Field(key: "path_seq")
 	var pathSeq: Int
 
-	@Field(key: "start_vid")
-	var startVid: Int
-
-	@Field(key: "end_vid")
-	var endVid: Int
-
 	@Field(key: "node")
 	var node: Int
 

@@ -22,7 +22,7 @@ struct RoutingService {
 	func calculateRoute(from startingPoint: Int, to destinationPoint: Int) async throws -> [Route]? {
 		if let sql = self.db as? SQLDatabase {
 			return try await sql.raw("""
-			SELECT dijkstra.*, ways.x1 AS lon1, ways.y1 AS lat1, ways.x2 AS lon2, ways.y2 AS lat2,
+			SELECT dijkstra.seq AS seq, dijkstra.path_seq AS path_seq, dijkstra.node AS node, dijkstra.edge AS edge, dijkstra.cost AS cost, dijkstra.agg_cost AS agg_cost, ways.x1 AS lon1, ways.y1 AS lat1, ways.x2 AS lon2, ways.y2 AS lat2,
 			CASE
 				WHEN LEFT(tag_id::TEXT, 1) IN ('1', '2', '3', '4') THEN TRUE
 				WHEN tag_id = 501 THEN TRUE
