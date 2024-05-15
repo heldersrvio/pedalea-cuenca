@@ -15,6 +15,8 @@ public func configure(_ app: Application) async throws {
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
 
+	app.routes.defaultMaxBodySize = "1mb"
+
     // register routes
     try routes(app)
 
