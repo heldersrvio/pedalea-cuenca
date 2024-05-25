@@ -3,3 +3,4 @@
 mapconfig.xml
 .env*
 .vscode
+*.cer
