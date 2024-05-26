@@ -61,6 +61,9 @@ struct UsersController: RouteCollection {
 		if let updatedUserGooglePurchaseToken = updatedUser.googlePurchaseToken {
 			user.googlePurchaseToken = updatedUserGooglePurchaseToken
 		}
+		if let updatedUserAppleAppAccountToken = updatedUser.appleAppAccountToken {
+			user.appleAppAccountToken = updatedUserAppleAppAccountToken
+		}
 		try await user.save(on: req.db)
 		return user
 	}

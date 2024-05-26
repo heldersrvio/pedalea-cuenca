@@ -1,7 +1,10 @@
 import Vapor
+import AppStoreServerLibrary
 import Fluent
 
 struct PaymentsController: RouteCollection {
+	let applePaymentService: ApplePaymentService
+
 	func boot(routes: RoutesBuilder) throws {
 		let payments = routes.grouped("payments")
 		payments.group("apple") { payment in
@@ -13,33 +16,42 @@ struct PaymentsController: RouteCollection {
 	}
 
 	func handleAppleNotification(req: Request) async throws -> HTTPStatus {
-		let applePaymentService = ApplePaymentService(jwt: req.jwt)
-		let responseBodyV2 = try req.content.decode(AppleResponseBodyV2.self)
-		let payload = try await applePaymentService.decodePayload(responseBodyV2.signedPayload)
-		guard let signedTransactionInfo = payload.data?.signedTransactionInfo else {
+		let responseBodyV2 = try req.content.decode(ResponseBodyV2.self)
+		guard let signedPayload = responseBodyV2.signedPayload else {
+			print("Could not find signed payload")
 			return .ok
 		}
-		let transactionInfo = try await applePaymentService.decodeTransactionInfo(signedTransactionInfo)
-		guard let appAccountToken = transactionInfo.appAccountToken else {
+		let payload = try await self.applePaymentService.decodePayload(signedPayload)
+		print("Decoded payload")
+		guard let signedTransactionInfo = payload.data?.signedTransactionInfo else {
+			print("Signed transaction info not found")
+			return .ok
+		}
+		let transactionInfo = try await self.applePaymentService.decodeTransactionInfo(signedTransactionInfo)
+		print("Found transaction info")
+		guard let appAccountToken = transactionInfo.appAccountToken?.uuidString else {
+			print("App account token not found")
 			throw Abort(.notFound)
 		}
 		guard let user = try await User.query(on: req.db)
 			.filter(\.$appleAppAccountToken == appAccountToken)
 			.first(), let userId = user.id else {
+				print("User not found")
 				throw Abort(.notFound)
 		}
 		guard let notificationType = payload.notificationType else {
+			print("Notification type not found")
 			throw Abort(.notFound)
 		}
 		print("Received \(notificationType) for user \(userId)")
 		switch notificationType {
-		case "DID_RENEW", "SUBSCRIBED":
+		case .didRenew, .subscribed:
 			user.isSubscriptionActive = true
 			try await user.save(on: req.db)
-		case "REVOKE", "EXPIRED":
+		case .revoke, .expired:
 			user.appleAppAccountToken = nil
 			fallthrough
-		case "REVOKE", "GRACE_PERIOD_EXPIRED", "EXPIRED":
+		case .revoke, .gracePeriodExpired, .expired:
 			user.isSubscriptionActive = false
 			try await user.save(on: req.db)
 		default:
@@ -116,5 +128,7 @@ struct PaymentsController: RouteCollection {
 		return .ok
 	}
 
-
+	init(applePaymentService: ApplePaymentService) {
+		self.applePaymentService = applePaymentService
+	}
 }

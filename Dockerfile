@@ -7,7 +7,7 @@ FROM swift:5.9-jammy as build
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
     && apt-get -q update \
     && apt-get -q dist-upgrade -y \
-    && apt-get install -y libjemalloc-dev
+    && apt-get install -y libjemalloc-dev wget
 
 # Set up a build area
 WORKDIR /build
@@ -19,6 +19,12 @@ WORKDIR /build
 COPY ./Package.* ./
 RUN swift package resolve --skip-update \
         $([ -f ./Package.resolved ] && echo "--force-resolved-versions" || true)
+
+RUN mkdir -p /etc/ssl/ && \
+	wget https://www.apple.com/appleca/AppleIncRootCertificate.cer -P /etc/ssl/ && \
+	wget https://www.apple.com/certificateauthority/AppleComputerRootCertificate.cer -P /etc/ssl/ && \
+	wget https://www.apple.com/certificateauthority/AppleRootCA-G2.cer -P /etc/ssl/ && \
+	wget https://www.apple.com/certificateauthority/AppleRootCA-G3.cer -P /etc/ssl/
 
 # Copy entire repo into container
 COPY . .
@@ -71,12 +77,14 @@ RUN useradd --user-group --create-home --system --skel /dev/null --home-dir /app
 # Switch to the new home directory
 WORKDIR /app
 
-RUN mkdir -p /etc/caddy
+RUN mkdir -p /etc/caddy && mkdir -p /etc/ssl
 
 # Copy built executable and any staged resources from builder
 COPY --from=build --chown=vapor:vapor /staging /app
+COPY --from=build --chown=vapor:vapor /etc/ssl /etc/ssl
 
 COPY Caddyfile /etc/caddy/
+
 
 # Provide configuration needed by the built-in crash reporter and some sensible default behaviors.
 ENV SWIFT_BACKTRACE=enable=yes,sanitize=yes,threads=all,images=all,interactive=no,swift-backtrace=./swift-backtrace-static

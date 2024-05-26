@@ -16,6 +16,7 @@ let package = Package(
 		.package(url: "https://github.com/vapor/fluent-kit.git", from: "1.47.1"),
 		.package(url: "https://github.com/vapor/jwt.git", from: "4.2.2"),
 		.package(url: "https://github.com/heldersrvio/google-cloud-kit.git", branch: "main"),
+		.package(url: "https://github.com/apple/app-store-server-library-swift.git", .upToNextMinor(from: "2.1.0")),
     ],
     targets: [
         .executableTarget(
@@ -26,6 +27,7 @@ let package = Package(
                 .product(name: "Vapor", package: "vapor"),
 				.product(name: "JWT", package: "jwt"),
 				.product(name: "GoogleCloudKit", package: "google-cloud-kit"),
+				.product(name: "AppStoreServerLibrary", package: "app-store-server-library-swift"),
             ]
         ),
         .testTarget(name: "AppTests", dependencies: [
