@@ -29,7 +29,7 @@ struct PaymentsController: RouteCollection {
 		}
 		let transactionInfo = try await self.applePaymentService.decodeTransactionInfo(signedTransactionInfo)
 		print("Found transaction info")
-		guard let appAccountToken = transactionInfo.appAccountToken?.uuidString else {
+		guard let appAccountToken = transactionInfo.appAccountToken?.uuidString.lowercased() else {
 			print("App account token not found")
 			throw Abort(.notFound)
 		}
