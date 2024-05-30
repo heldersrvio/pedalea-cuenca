@@ -1,7 +1,7 @@
 import Vapor
 import AppStoreServerLibrary
 
-let BUNDLE_ID = "org.serviosoftware.ciclocuenca"
+let BUNDLE_ID = "org.serviosoftware.pedaleacuenca"
 
 struct ApplePaymentService {
 

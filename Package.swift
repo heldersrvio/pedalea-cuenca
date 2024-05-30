@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "ciclo-cuenca",
+    name: "pedalea-cuenca",
     platforms: [
        .macOS(.v13)
     ],
