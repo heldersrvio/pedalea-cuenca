@@ -9,6 +9,7 @@ struct UsersController: RouteCollection {
 		secure.group(":id") { user in
 			user.get(use: show)
 			user.put(use: update)
+			user.delete(use: delete)
 		}
 	}
 
@@ -66,5 +67,17 @@ struct UsersController: RouteCollection {
 		}
 		try await user.save(on: req.db)
 		return user
+	}
+
+	func delete(req: Request) async throws -> HTTPStatus {
+		let sessionToken = try req.auth.require(SessionToken.self)
+        guard sessionToken.userId == req.parameters.get("id") else {
+            throw Abort(.unauthorized)
+        }
+        guard let user = try await User.find(req.parameters.get("id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+		try await user.delete(on: req.db)
+		return .ok
 	}
 }
