@@ -17,6 +17,15 @@ public func configure(_ app: Application) async throws {
 
 	app.routes.defaultMaxBodySize = "1mb"
 
+	let corsConfiguration = CORSMiddleware.Configuration(
+		allowedOrigin: .any(["http://localhost", "http://localhost:5173", "https://www.pedaleacuenca.com", "https://pedaleacuenca.com"]),
+		allowedMethods: [.GET, .POST, .PUT, .OPTIONS, .DELETE],
+		allowedHeaders: [.accept, .authorization, .contentType, .origin, .xRequestedWith, .userAgent, .accessControlAllowOrigin]
+	)
+	let cors = CORSMiddleware(configuration: corsConfiguration)
+
+	app.middleware.use(cors, at: .beginning)
+
     // register routes
     try routes(app)
 
