@@ -14,9 +14,18 @@ struct UsersController: RouteCollection {
 	}
 
 	func signIn(req: Request) async throws -> ClientTokenResponse {
-		let googleAuthService = GoogleAuthService(jwt: req.jwt)
 		let signInRequest = try req.content.decode(SignInRequest.self)
-		let token = try await googleAuthService.verifyIdToken(signInRequest.idToken)
+		if (signInRequest.authenticationProvider == .apple) {
+			return try await signInWithApple(req: req)
+		} else {
+			return try await signInWithGoogle(req: req)
+		}
+	}
+
+	private func signInWithGoogle(req: Request) async throws -> ClientTokenResponse {
+		let signInRequest = try req.content.decode(SignInRequest.self)
+		let authService = GoogleAuthService(jwt: req.jwt)
+		let token = try await authService.verifyIdToken(signInRequest.idToken)
 		guard let email = token.email else {
 			throw Abort(.unauthorized, reason: "Email not present in token")
 		}
@@ -34,6 +43,26 @@ struct UsersController: RouteCollection {
 		}
 		let jwtPayload = SessionToken(userId: newUserId, isSubscriptionActive: newUserSubscriptionStatus, googlePurchaseToken: newUser.googlePurchaseToken, appleAppAccountToken: newUser.appleAppAccountToken)
 		return ClientTokenResponse(userId: newUserId.uuidString, userName: name, token: try req.jwt.sign(jwtPayload))
+	}
+	
+	private func signInWithApple(req: Request) async throws -> ClientTokenResponse {
+		let signInRequest = try req.content.decode(SignInRequest.self)
+		let authService = AppleAuthService(jwt: req.jwt)
+		let token = try await authService.verifyIdToken(signInRequest.idToken)
+		guard let email = token.email else {
+			throw Abort(.unauthorized, reason: "Email not present in token")
+		}
+		if let user = try await User.query(on: req.db).filter(\.$email == email).first(), let userId = user.id, let isSubscriptionActive = user.isSubscriptionActive {
+			let jwtPayload = SessionToken(userId: userId, isSubscriptionActive: isSubscriptionActive, googlePurchaseToken: user.googlePurchaseToken, appleAppAccountToken: user.appleAppAccountToken)
+			return ClientTokenResponse(userId: userId.uuidString, token: try req.jwt.sign(jwtPayload))
+		}
+		let newUser = User(email: email)
+		try await newUser.save(on: req.db)
+		guard let newUserId = newUser.id, let newUserSubscriptionStatus = newUser.isSubscriptionActive else {
+			throw Abort(.unauthorized, reason: "Could not save user")
+		}
+		let jwtPayload = SessionToken(userId: newUserId, isSubscriptionActive: newUserSubscriptionStatus, googlePurchaseToken: newUser.googlePurchaseToken, appleAppAccountToken: newUser.appleAppAccountToken)
+		return ClientTokenResponse(userId: newUserId.uuidString, token: try req.jwt.sign(jwtPayload))
 	}
 
 	func show(req: Request) async throws -> User {

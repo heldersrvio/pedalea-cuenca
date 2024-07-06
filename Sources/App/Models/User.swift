@@ -23,7 +23,7 @@ final class User: Model, Content {
 	@Field(key: "subscription_active")
 	var isSubscriptionActive: Bool?
 
-	init(id: UUID? = nil, name: String, email: String, googlePurchaseToken: String? = nil, appleAppAccountToken: String? = nil, isSubscriptionActive: Bool? = false) {
+	init(id: UUID? = nil, name: String? = "", email: String, googlePurchaseToken: String? = nil, appleAppAccountToken: String? = nil, isSubscriptionActive: Bool? = false) {
 		self.id = id
 		self.name = name
 		self.email = email
