@@ -34,6 +34,7 @@ public func configure(_ app: Application) async throws {
 	app.migrations.add(GooglePaymentMigration())
 	app.migrations.add(UserIndicesMigration())
 	app.migrations.add(ExtensionsMigration())
+	app.migrations.add(HasDiscountMigration())
 
 	app.jwt.signers.use(.hs256(key: Environment.get("JWT_KEY") ?? "secret"))
 }

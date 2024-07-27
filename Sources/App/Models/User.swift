@@ -23,6 +23,9 @@ final class User: Model, Content {
 	@Field(key: "subscription_active")
 	var isSubscriptionActive: Bool?
 
+	@Field(key: "has_discount")
+	var hasDiscount: Bool?
+
 	init(id: UUID? = nil, name: String? = "", email: String, googlePurchaseToken: String? = nil, appleAppAccountToken: String? = nil, isSubscriptionActive: Bool? = false) {
 		self.id = id
 		self.name = name
@@ -30,6 +33,7 @@ final class User: Model, Content {
 		self.isSubscriptionActive = isSubscriptionActive
 		self.googlePurchaseToken = googlePurchaseToken
 		self.appleAppAccountToken = appleAppAccountToken
+		self.hasDiscount = false
 	}
 
 	init() { }
